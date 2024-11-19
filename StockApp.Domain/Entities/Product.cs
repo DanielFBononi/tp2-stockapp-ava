@@ -1,9 +1,11 @@
 ﻿using StockApp.Domain.Validation;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace StockApp.Domain.Entities
 {
@@ -11,10 +13,24 @@ namespace StockApp.Domain.Entities
     {
         #region Atributos
         public int Id { get; set; }
+
+        [Required(ErrorMessage ="Invalid name, name is required")]
+        [MinLength(3, ErrorMessage = "Invalid name, too short, minimal 3 characters")]
         public string Name { get; set; }
+
+        [Required(ErrorMessage = "Invalid description, description is required")]
+        [MinLength(5 , ErrorMessage = "Invalid description, too short, minimum 5 characters.")]
         public string Description { get; set; }
+
+        [Required (ErrorMessage = "Invalid Price, Price is required")]
+        [Range(0 , double.MaxValue, ErrorMessage = "Invalid price, price negative value")]
         public decimal Price { get; set; }
+
+        [Required (ErrorMessage = "Invalid stock, stock is required")]
+        [Range(0 , int.MaxValue , ErrorMessage = "Invalid stock, stock negative value")]
         public int Stock { get; set;}
+
+        [MaxLength(250 , ErrorMessage = "Image invalid, too long, Image max 250 characters")]
         public string Image { get; set; }
         public int CategoryId { get; set; }
         #endregion
