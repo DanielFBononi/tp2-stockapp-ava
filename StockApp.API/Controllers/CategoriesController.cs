@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StockApp.Application.DTOs;
 using StockApp.Application.Interfaces;
+using StockApp.Infra.Data.Email;
 using System.Linq;
 
 namespace StockApp.API.Controllers
@@ -32,6 +33,14 @@ namespace StockApp.API.Controllers
             }
             return Ok(categories);
         }
+        [HttpGet("sendemail")]
+        public async Task<ActionResult> SendEmail()
+        {
+            var smtp = new SmtpEmailSender();
+            await smtp.SendEmailAsync("daniel@yopmail.com", "dnielbf21@gmail.com", "Titulo", "Texto");
+            return NoContent();
+        }
+
         [HttpGet("{id:int}", Name = "GetCategory")]
         public async Task<ActionResult<CategoryDTO>> Get(int id)
         {

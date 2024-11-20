@@ -7,6 +7,7 @@ using StockApp.Application.Mappings;
 using StockApp.Application.Services;
 using StockApp.Domain.Interfaces;
 using StockApp.Infra.Data.Context;
+using StockApp.Infra.Data.Email;
 using StockApp.Infra.Data.Repositories;
 
 
@@ -21,6 +22,7 @@ namespace StockApp.Infra.IoC
              options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"
             ), b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
+            services.AddScoped<IEmailSender, SmtpEmailSender>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IProductService, ProductService>();

@@ -1,0 +1,7 @@
+services:
+  local-email:
+    image: jijiechen/papercut:latest
+    container_name: stockapp-local-email
+    ports:
+      - 25:25
+      - 37408:37408
