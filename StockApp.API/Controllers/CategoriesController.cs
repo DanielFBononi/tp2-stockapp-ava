@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StockApp.Application.DTOs;
 using StockApp.Application.Interfaces;
+using System.Linq;
 
 namespace StockApp.API.Controllers
 {
@@ -16,12 +17,18 @@ namespace StockApp.API.Controllers
         }
 
         [HttpGet(Name ="GetCategories")]
-        public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get() 
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get([FromQuery]QueryDTO query) 
         {
             var categories = await _categoryService.GetCategories();
             if(categories== null)
             {
                 return NotFound("Categories not found");
+            }
+
+            if (query.Skip is not null && query.Page is not null)
+            {
+                var skip = (query.Skip - 1) * query.Page;
+                categories = categories.ToList().Skip((int)skip).Take((int)query.Page);
             }
             return Ok(categories);
         }
