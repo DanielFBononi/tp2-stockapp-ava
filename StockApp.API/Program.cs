@@ -1,5 +1,8 @@
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using StockApp.Infra.IoC;
+using System.Text;
+
 internal class Program
 {
     private static void Main(string[] args)
@@ -9,20 +12,57 @@ internal class Program
         // Add services to the container.
         builder.Services.AddInfrastructureAPI(builder.Configuration);
 
-
         builder.Services.AddControllers();
 
+        // Configure Swagger
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        builder.Services.AddSwaggerGen(c =>
+        {
+            c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
 
-        builder.Services.AddAuthentication("Bearer").AddJwtBearer("Bearer", options =>
-       {
-           options.TokenValidationParameters = new TokenValidationParameters
-           {
-               ValidateAudience = false
-           };
+            var securitySchema = new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            };
+
+            c.AddSecurityDefinition("Bearer", securitySchema);
+
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    securitySchema,
+                    new[] { "Bearer" }
+                }
+            });
         });
 
+        // JWT Configuration
+        var jwtSettings = builder.Configuration.GetSection("Jwt");
+        var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
+
+        builder.Services.AddAuthentication("Bearer").AddJwtBearer("Bearer", options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidAudience = jwtSettings["Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(key)
+            };
+        });
 
         builder.Services.AddAuthorization(options =>
         {
@@ -44,48 +84,8 @@ internal class Program
         app.UseAuthentication();
         app.UseAuthorization();
 
-
         app.MapControllers();
 
         app.Run();
-
-
-
-
-        // Middleware para Rate Limiting
-
-        var requestCounts = new Dictionary<string, int>();
-        var resetTime = DateTime.UtcNow.AddMinutes(2);
-        var request_limit = 2;
-
-        app.Use(async (context, next) =>
-        {
-            var clienteIp = context.Connection.RemoteIpAddress?.ToString()?? "unknowm";
-
-            if (!requestCounts.ContainsKey(clienteIp))
-            {
-                requestCounts[clienteIp] = 0;
-            }
-            if (DateTime.UtcNow > resetTime)
-            {
-                requestCounts.Clear();
-                resetTime = DateTime.UtcNow.AddMinutes(2);
-            }
-            requestCounts[clienteIp]++;
-
-            if (requestCounts[clienteIp]> request_limit)
-            {
-                context.Response.StatusCode = 429;
-                await context.Response.WriteAsync("Limite de requisições, tente novamente maus tarde");
-                return;
-            }
-            await next();
-        });
-
-        //Middleware de Autorização Baseada em Roles
-
-       
-
-
     }
 }
