@@ -1,5 +1,7 @@
 using Microsoft.IdentityModel.Tokens;
 using StockApp.Infra.IoC;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+
 internal class Program
 {
     private static void Main(string[] args)
@@ -28,6 +30,12 @@ internal class Program
         {
             options.AddPolicy("AdminPolicy", policy =>
                 policy.RequireRole("Admin"));
+        });
+
+
+        builder.Services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = builder.Configuration.GetConnectionString("Redis");
         });
 
         var app = builder.Build();
