@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StockApp.Application.DTOs;
 using StockApp.Application.Interfaces;
+using StockApp.Application.Services;
 using StockApp.Infra.Data.Email;
 using System.Linq;
+using System.Text;
 
 namespace StockApp.API.Controllers
 {
@@ -33,6 +35,7 @@ namespace StockApp.API.Controllers
             }
             return Ok(categories);
         }
+
         [HttpGet("sendemail")]
         public async Task<ActionResult> SendEmail()
         {
