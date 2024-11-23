@@ -1,4 +1,5 @@
 ﻿using StockApp.Application.DTOs;
+using StockApp.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,9 +11,10 @@ namespace StockApp.Application.Interfaces
     public interface IProductService
     {
         Task<IEnumerable<ProductDTO>> GetProducts();
-        Task<ProductDTO> GetProductById(int? id);
-        Task Add(ProductDTO productDto);
+        Task<ProductDTO> GetProductById(int id);
+        Task<Product> Add(ProductDTO productDto);
         Task Update(ProductDTO productDto);
-        Task Remove(int? id);
+        Task Remove(int id);
+        
     }
 }
