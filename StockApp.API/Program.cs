@@ -1,5 +1,5 @@
+using Microsoft.IdentityModel.Tokens;
 using StockApp.Infra.IoC;
-
 internal class Program
 {
     private static void Main(string[] args)
@@ -15,6 +15,21 @@ internal class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
+        builder.Services.AddAuthentication("Bearer").AddJwtBearer("Bearer", options =>
+       {
+           options.TokenValidationParameters = new TokenValidationParameters
+           {
+               ValidateAudience = false
+           };
+        });
+
+
+        builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy("AdminPolicy", policy =>
+                policy.RequireRole("Admin"));
+        });
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -26,7 +41,9 @@ internal class Program
 
         app.UseHttpsRedirection();
 
+        app.UseAuthentication();
         app.UseAuthorization();
+
 
         app.MapControllers();
 
@@ -64,6 +81,11 @@ internal class Program
             }
             await next();
         });
+
+        //Middleware de Autorização Baseada em Roles
+
+       
+
 
     }
 }
