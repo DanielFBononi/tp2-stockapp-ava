@@ -85,6 +85,7 @@ internal class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
+        app.UseCors();
 
         app.UseHttpsRedirection();
 

@@ -30,7 +30,7 @@ namespace StockApp.Application.Services
             return _mapper.Map<IEnumerable<ProductDTO>>(productsEntity);
         }
 
-        public async Task<ProductDTO> GetProductById(int id)
+        public async Task<Product> GetProductById(int id)
         {
             var productEntity = await _productRepository.GetById(id);
             if (productEntity is null)
@@ -38,7 +38,7 @@ namespace StockApp.Application.Services
                 throw new ArgumentException();
             }
 
-            return _mapper.Map<ProductDTO>(productEntity);
+            return productEntity;
         }
 
         public async Task Remove(int id)
@@ -47,10 +47,9 @@ namespace StockApp.Application.Services
             await _productRepository.Remove(productEntity);
         }
 
-        public async Task Update(ProductDTO productDto)
+        public async Task Update(Product product)
         {
-            var productEntity = _mapper.Map<Product>(productDto);
-            await _productRepository.Update(productEntity);
+            await _productRepository.Update(product);
         }
     }
 }

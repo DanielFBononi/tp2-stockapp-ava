@@ -39,7 +39,7 @@ namespace StockApp.Infra.Data.Repositories
 
         public async Task<Product> Update(Product product)
         {
-            _productContext.Update(product);
+            //_productContext.Update(product);
             await _productContext.SaveChangesAsync();
             return product;
         }

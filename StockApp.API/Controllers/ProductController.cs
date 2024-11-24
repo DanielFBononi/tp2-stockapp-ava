@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Cors;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using StockApp.Application.DTOs;
 using StockApp.Application.Interfaces;
+using StockApp.Domain.Entities;
+using StockApp.Domain.Interfaces;
 using System.Text;
 
 namespace StockApp.API.Controllers
@@ -15,12 +18,13 @@ namespace StockApp.API.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
-        
-  
-
-        public ProductsController(IProductService productService)
+        private readonly IStockService _stockService;
+        private readonly IMapper _mapper;
+        public ProductsController(IProductService productService, IStockService stockService, IMapper mapper)
         {
             _productService = productService;
+            _stockService = stockService;
+            _mapper = mapper;
         }
 
 
@@ -40,14 +44,14 @@ namespace StockApp.API.Controllers
         {
             var products = await _productService.GetProducts();
             var csv = new StringBuilder();
-            csv.AppendLine("Id,Name,Description,Price,Stock");
+            csv.AppendLine("Name,Description,Price,Stock");
 
-            foreach (var product in products)
-            {
-                csv.AppendLine($"{product.Id},{product.Name},{product.Description},{product.Price},{product.Stock}");
-            }
+           foreach (var product in products)
+           {
+               csv.AppendLine($"{product.Name},{product.Description},{product.Price},{product.Stock}");
+           }
 
-            return File(Encoding.UTF8.GetBytes(csv.ToString()), "text/csv", "products.csv");
+           return File(Encoding.UTF8.GetBytes(csv.ToString()), "text/csv", "products.csv");
         }
 
         [HttpGet("{id:int}", Name = "GetProduct")]
@@ -80,7 +84,8 @@ namespace StockApp.API.Controllers
                 return BadRequest("ID mismatch.");
             if (!ModelState.IsValid)
                 return BadRequest("ID mismatch.");
-            await _productService.Update(productDto);
+            var product = _mapper.Map<Product>(productDto);
+            await _productService.Update(product);
             return Ok(productDto);
         }
 
@@ -91,6 +96,25 @@ namespace StockApp.API.Controllers
             if (product == null)
                 return NotFound();
             await _productService.Remove(id);
+            return Ok();
+        }
+
+        [HttpPost("sale-product")]
+        public async Task<ActionResult> SaleProduct([FromBody]List<int> ids)
+        {
+            foreach (var id in ids)
+            {
+                var product = await _productService.GetProductById(id);
+                if (product == null)
+                {
+                    return NotFound("Not Found");
+                }
+                if (product.Stock <= 10)
+                {
+                    await _stockService.AutomaticReplacement(product);
+                }
+            }
+
             return Ok();
         }
     }
