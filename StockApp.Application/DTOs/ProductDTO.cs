@@ -12,7 +12,7 @@ namespace StockApp.Application.DTOs
 {
     public class ProductDTO
     {
-        public int Id { get; set; }
+        //public int Id { get; set; }
 
         [Required(ErrorMessage = "The Name is Required")]
         [MinLength(3)]

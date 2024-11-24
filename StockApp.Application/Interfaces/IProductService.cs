@@ -11,9 +11,9 @@ namespace StockApp.Application.Interfaces
     public interface IProductService
     {
         Task<IEnumerable<ProductDTO>> GetProducts();
-        Task<ProductDTO> GetProductById(int id);
+        Task<Product> GetProductById(int id);
         Task<Product> Add(ProductDTO productDto);
-        Task Update(ProductDTO productDto);
+        Task Update(Product product);
         Task Remove(int id);
         
     }
