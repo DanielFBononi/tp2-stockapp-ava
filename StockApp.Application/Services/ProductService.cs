@@ -51,5 +51,11 @@ namespace StockApp.Application.Services
         {
             await _productRepository.Update(product);
         }
+
+        public async Task<IEnumerable<ProductDTO>> GetFilteredProducts(string name, decimal? minPrice, decimal? maxPrice)
+        {
+            var products = await _productRepository.GetFilteredProducts(name, minPrice, maxPrice);
+            return _mapper.Map<IEnumerable<ProductDTO>>(products);
+        }
     }
 }

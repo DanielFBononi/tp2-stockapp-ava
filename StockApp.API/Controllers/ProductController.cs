@@ -18,12 +18,10 @@ namespace StockApp.API.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
-        private readonly IStockService _stockService;
         private readonly IMapper _mapper;
-        public ProductsController(IProductService productService, IStockService stockService, IMapper mapper)
+        public ProductsController(IProductService productService, IMapper mapper)
         {
             _productService = productService;
-            _stockService = stockService;
             _mapper = mapper;
         }
 
@@ -98,24 +96,24 @@ namespace StockApp.API.Controllers
             await _productService.Remove(id);
             return Ok();
         }
-
-        [HttpPost("sale-product")]
-        public async Task<ActionResult> SaleProduct([FromBody]List<int> ids)
+        [HttpGet("filtered")]
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetFiltered(
+            [FromQuery] string name,
+            [FromQuery] decimal? minPrice,
+            [FromQuery] decimal? maxPrice)
         {
-            foreach (var id in ids)
+            // Chama o serviço de produtos para buscar os dados filtrados
+            var products = await _productService.GetFilteredProducts(name, minPrice, maxPrice);
+
+            if (products == null || !products.Any())
             {
-                var product = await _productService.GetProductById(id);
-                if (product == null)
-                {
-                    return NotFound("Not Found");
-                }
-                if (product.Stock <= 10)
-                {
-                    await _stockService.AutomaticReplacement(product);
-                }
+                return NotFound("No products found with the given criteria.");
             }
 
-            return Ok();
+            return Ok(products);
         }
+
+
+
     }
 }
